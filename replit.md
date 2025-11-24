@@ -18,9 +18,7 @@ The project is organized as a monorepo with separate backend and frontend applic
 │   ├── database/         - Database configuration
 │   ├── migrations/       - Database migrations
 │   ├── scripts/          - Utility scripts
-│   ├── android/          - Android native app project
-│   ├── ios/              - iOS native app project
-│   ├── deployment/       - Docker deployment configs
+│   ├── deployment/       - Docker deployment (Dockerfile, entrypoint.sh, healthcheck.sh)
 │   └── package.json      - Backend dependencies
 │
 ├── frontend/             (Public Website - NEW)
@@ -45,9 +43,9 @@ The project is organized as a monorepo with separate backend and frontend applic
 
 ### Deployment
 Both projects have independent Docker configurations:
-- **Backend**: `backend/deployment/Dockerfile.backend` - Multi-stage build with all features
+- **Backend**: `backend/deployment/Dockerfile` - Multi-stage production build
 - **Frontend**: `frontend/Dockerfile` - Optimized Nginx-served static site
-- **Orchestration**: Root-level `docker-compose.production.yml` coordinates both services
+- **Orchestration**: Root-level `docker-compose.production.yml` - Coolify-ready configuration
 
 ### API Communication
 The frontend communicates with the backend via:
@@ -101,4 +99,24 @@ The application is designed as a **monorepo** with separate backend and frontend
 - **Replit Object Storage, MinIO, AWS S3**: Object Storage.
 - **react-datepicker**: Date and time selection.
 - **AWS SDK**: For S3-compatible storage.
-- **Ionic Capacitor**: Native app framework.
+- **Ionic Capacitor**: Native app framework (removed from deployment - web only).
+
+## Recent Changes (November 24, 2025)
+
+### Backend Deployment Cleanup
+- ✅ Removed unnecessary folders: `android/`, `ios/`, `docs/`
+- ✅ Cleaned `backend/deployment/` - only essential files remain:
+  - `Dockerfile` - Production-optimized multi-stage build
+  - `entrypoint.sh` - Startup initialization with DB migrations
+  - `healthcheck.sh` - Service health check
+  - `.dockerignore` - Build optimization
+- ✅ Removed redundant documentation files from deployment folder
+- ✅ Created comprehensive `.env.example` with all required variables
+- ✅ Updated `docker-compose.production.yml` for clean monorepo structure
+- ✅ Created Coolify-focused `DEPLOYMENT.md`
+
+### Backend Structure Optimization
+- Minimal deployment folder - only 4 files needed for production
+- No unnecessary scripts or documentation in deployment folder
+- Clear separation: backend logic vs deployment config
+- Environment variables centralized in `.env.example`

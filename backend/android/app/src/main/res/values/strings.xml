@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">USA Luxury Limo</string>
-    <string name="title_activity_main">USA Luxury Limo</string>
-    <string name="package_name">com.usaluxurylimo.app</string>
-    <string name="custom_url_scheme">com.usaluxurylimo.app</string>
-</resources>

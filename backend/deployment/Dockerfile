@@ -1,38 +1,25 @@
-# Production-optimized Dockerfile for USA Luxury Limo
+# Production Dockerfile for USA Luxury Limo Backend
+# Optimized for Coolify deployment
 # Multi-stage build for minimal image size
 
-# Stage 1: Build frontend
-FROM node:20-alpine AS frontend-builder
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Copy dependency files
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
 
-COPY client ./client
-COPY shared ./shared
-COPY tsconfig.json ./
-COPY vite.config.ts ./
-COPY tailwind.config.ts ./
-COPY postcss.config.js ./
+# Install dependencies
+RUN npm ci
 
-RUN npm run build
-
-# Stage 2: Build backend
-FROM node:20-alpine AS backend-builder
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
-
+# Copy source code
 COPY server ./server
 COPY shared ./shared
-COPY db ./db
 COPY tsconfig.json ./
 COPY drizzle.config.ts ./
 
-# Stage 3: Production runtime
+# Stage 2: Runtime
 FROM node:20-alpine
 
 WORKDIR /app
@@ -41,20 +28,18 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy built assets from build stages
-COPY --from=frontend-builder /app/dist ./dist
-COPY --from=backend-builder /app/server ./server
-COPY --from=backend-builder /app/shared ./shared
-COPY --from=backend-builder /app/db ./db
-COPY --from=backend-builder /app/drizzle.config.ts ./
-COPY --from=backend-builder /app/tsconfig.json ./
+# Copy application from builder
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/shared ./shared
+COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/tsconfig.json ./
 
-# Copy deployment scripts
+# Copy scripts
 COPY deployment/entrypoint.sh ./
 COPY deployment/healthcheck.sh ./
 RUN chmod +x entrypoint.sh healthcheck.sh
 
-# Create non-root user
+# Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \
     chown -R nodejs:nodejs /app

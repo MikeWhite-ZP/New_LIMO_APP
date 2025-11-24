@@ -1,6 +1,6 @@
-# USA Luxury Limo - Deployment Guide
+# USA Luxury Limo - Production Deployment Guide
 
-Complete deployment guide for the USA Luxury Limo monorepo to Coolify or any Docker-based platform.
+Coolify-optimized deployment guide for the USA Luxury Limo monorepo.
 
 ## 📋 Table of Contents
 
