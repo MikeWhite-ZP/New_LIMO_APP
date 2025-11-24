@@ -1,6 +1,6 @@
 import { sendEmail } from './email';
 import { storage } from './storage';
-import type { Booking, User } from '@shared/schema';
+import type { Booking, User } from '../../shared/schema.js';
 
 async function getSystemAdminEmail(): Promise<string | null> {
   try {

@@ -1,5 +1,5 @@
 import { sendEmail } from './email';
-import type { EmailTemplateSlug } from '@shared/schema';
+import type { EmailTemplateSlug } from '../../shared/schema.js';
 
 // Default email template configurations
 export interface DefaultEmailTemplate {

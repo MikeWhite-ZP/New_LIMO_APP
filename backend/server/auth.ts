@@ -11,7 +11,7 @@ import { pool } from "./db";
 import { scrypt, randomBytes, timingSafeEqual, createHash } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import type { User as SelectUser } from "@shared/schema";
+import type { User as SelectUser } from "../../shared/schema.js";
 
 const PgSession = connectPg(session);
 const MemStore = MemoryStore(session);
