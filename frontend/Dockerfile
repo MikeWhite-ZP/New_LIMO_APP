@@ -1,4 +1,8 @@
-# Build stage
+# Frontend Production Dockerfile
+# Multi-stage build with Nginx reverse proxy
+# Optimized for Coolify deployment
+
+# Stage 1: Build React application
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -7,28 +11,38 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy source code
+# Copy source code and configuration
 COPY . .
 
 # Build the application
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Stage 2: Production with Nginx
+FROM nginx:alpine
 
-WORKDIR /app
+WORKDIR /usr/share/nginx/html
 
-# Copy built files from builder - copy the entire dist directory
-COPY --from=builder /app/dist ./dist
+# Copy built files from builder
+COPY --from=builder /app/dist ./
+
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Create non-root user for security
+RUN addgroup -g 101 -S nginx || true && \
+    adduser -S nginx -u 101 -G nginx || true && \
+    chown -R nginx:nginx /usr/share/nginx/html
+
+USER nginx
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
-# Serve static files with a simple HTTP server
-# Install http-server globally
-RUN npm install -g http-server
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 
-# Start serving from dist/public (where Vite puts the HTML)
-CMD ["http-server", "dist/public", "-p", "3000", "--gzip"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
