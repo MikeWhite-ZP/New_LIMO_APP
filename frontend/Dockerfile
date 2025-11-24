@@ -20,14 +20,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install serve to run the static app
-RUN npm install -g serve
-
-# Copy built files from builder
+# Copy built files from builder - copy the entire dist directory
 COPY --from=builder /app/dist ./dist
 
-# Expose port (adjust if needed)
+# Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Serve static files with a simple HTTP server
+# Install http-server globally
+RUN npm install -g http-server
+
+# Start serving from dist/public (where Vite puts the HTML)
+CMD ["http-server", "dist/public", "-p", "3000", "--gzip"]
