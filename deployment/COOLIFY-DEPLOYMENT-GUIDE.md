@@ -2,6 +2,21 @@
 
 Bu rehber, USA Luxury Limo uygulamasını Coolify üzerinden Ubuntu sunucuya nasıl deploy edeceğinizi adım adım açıklar.
 
+---
+
+## ⚠️ ÖNEMLİ: Deployment Fix (Kasım 2025)
+
+**Coolify deployment hatası düzeltildi!** 
+
+Coolify'nin sandboxed build sistemi nedeniyle, docker-compose dosyası **root dizinde** olmalıdır.
+
+**Doğru Dosya:** `docker-compose.production.yml` (root dizinde)  
+**Yanlış:** `deployment/docker-compose.yml` (sadece local test için)
+
+Detaylar için: [`COOLIFY-FIX.md`](./COOLIFY-FIX.md)
+
+---
+
 ## 📋 İçindekiler
 
 1. [Gereksinimler](#gereksinimler)
@@ -70,10 +85,11 @@ Bu rehber, USA Luxury Limo uygulamasını Coolify üzerinden Ubuntu sunucuya nas
    ```
    (root dizin)
 
-5. **Docker Compose Location:**
+5. **Docker Compose Location:** ⚠️ **ÇOK ÖNEMLİ!**
    ```
-   deployment/docker-compose.yml
+   docker-compose.production.yml
    ```
+   **NOT:** `deployment/docker-compose.yml` DEĞİL! Root dizindeki dosyayı kullanın.
 
 ### Adım 3: Build Pack Ayarları
 
@@ -85,6 +101,8 @@ Coolify otomatik olarak algılayacak:
 ```
 deployment/Dockerfile
 ```
+
+⚠️ **Kritik Not:** Coolify'nin sandboxed build sistemi nedeniyle, docker-compose dosyası **root dizinde** olmalıdır. `deployment/docker-compose.yml` dosyası sadece local test içindir. Detaylar için `deployment/COOLIFY-FIX.md` dosyasına bakın.
 
 ### Adım 4: Network Ayarları
 

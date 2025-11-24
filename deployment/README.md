@@ -2,17 +2,35 @@
 
 Production deployment folder for USA Luxury Limo application on Coolify + Ubuntu Server.
 
+---
+
+## ⚠️ IMPORTANT: Deployment Fix (November 2025)
+
+**Coolify deployment issue resolved!**
+
+Due to Coolify's sandboxed build system, the docker-compose file **must be in root directory**.
+
+**Correct:** `docker-compose.production.yml` (in root directory)  
+**Incorrect:** `deployment/docker-compose.yml` (local testing only)
+
+See: [`COOLIFY-FIX.md`](./COOLIFY-FIX.md) for full details.
+
+---
+
 ## 📦 Contents
 
 - `Dockerfile` - Production-optimized multi-stage build
-- `docker-compose.yml` - Coolify deployment configuration with Caddy labels
+- `docker-compose.yml` - **LOCAL TESTING ONLY** (not for Coolify!)
 - `entrypoint.sh` - Container startup script with auto-migrations
 - `healthcheck.sh` - Container health monitoring
 - `deploy.sh` - Local build and test script
 - `.env.example` - Complete environment variables template
 - `.dockerignore` - Build optimization
 - `COOLIFY-DEPLOYMENT-GUIDE.md` - **Detailed Coolify setup instructions (Turkish)**
+- `COOLIFY-FIX.md` - **Deployment fix explanation and solution**
 - `PRODUCTION-CHECKLIST.md` - Pre-deployment verification
+
+**For Coolify:** Use `../docker-compose.production.yml` (root directory)
 
 ## 🚀 Quick Start
 

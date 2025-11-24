@@ -2,6 +2,19 @@
 
 Pre-deployment verification checklist for USA Luxury Limo on Coolify.
 
+---
+
+## ⚠️ CRITICAL: Deployment Fix Applied (November 2025)
+
+**Docker Compose file location changed!**
+
+✅ **Correct:** Use `docker-compose.production.yml` (in root directory)  
+❌ **Incorrect:** `deployment/docker-compose.yml` (local testing only)
+
+See [`COOLIFY-FIX.md`](./COOLIFY-FIX.md) for details.
+
+---
+
 ## 📋 Pre-Deployment Checklist
 
 ### 1. Environment Variables
@@ -62,8 +75,9 @@ Pre-deployment verification checklist for USA Luxury Limo on Coolify.
 - [ ] **Resource created** in Coolify
 - [ ] **Git repository** connected
 - [ ] **Branch** selected (main/production)
-- [ ] **Docker Compose location** set to `deployment/docker-compose.yml`
+- [ ] **Docker Compose location** set to `docker-compose.production.yml` ⚠️ **ROOT DIRECTORY!**
 - [ ] **Dockerfile location** set to `deployment/Dockerfile`
+- [ ] **Root-level compose file exists** at `docker-compose.production.yml`
 - [ ] **Network configuration**:
   - [ ] "Connect to Predefined Network" enabled
   - [ ] Correct network selected (same as PostgreSQL/MinIO)
