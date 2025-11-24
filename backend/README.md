@@ -1,148 +1,94 @@
 # USA Luxury Limo - Backend
 
 ## Overview
-This is the backend API server and admin portal for USA Luxury Limo. It handles:
-- Authentication (Replit Auth, sessions, password recovery)
-- Admin Portal (CMS, vehicle types, settings, email templates)
-- Driver Portal (job acceptance, navigation, documents)
-- Dispatcher Portal (job assignment, tracking)
-- Passenger Portal (booking history, invoices)
-- Mobile App APIs
-- Database operations (PostgreSQL + Drizzle ORM)
-- Object Storage (MinIO/S3)
-- Payment processing (Stripe, PayPal, Square)
-- Email/SMS notifications (Nodemailer, Twilio)
-- RESTful API endpoints
+Backend API server and admin portals for USA Luxury Limo.
 
-## Tech Stack
-- **Backend:** Node.js, Express.js, TypeScript
-- **Database:** PostgreSQL (Neon) with Drizzle ORM
-- **Authentication:** Replit Auth (OpenID Connect)
-- **Storage:** Replit Object Storage / MinIO / AWS S3
-- **Payments:** Stripe, PayPal, Square
-- **Notifications:** Twilio (SMS), Nodemailer (Email)
+**NOTE:** This is the main backend codebase, located in the `backend/` directory. For development convenience, symlinks exist at the root level pointing to this directory.
 
-## Project Structure
+## Structure
 ```
 backend/
 ├── server/              # Express server & API routes
-├── client/              # Admin/Driver/Dispatcher/Passenger UIs (React)
-├── shared/              # Shared TypeScript types & schemas
-├── migrations/          # Database migrations (Drizzle)
+├── client/              # Admin/Driver/Dispatcher React UIs
 ├── database/            # Database utilities
+├── migrations/          # Drizzle migrations
 ├── scripts/             # Utility scripts
-└── deployment/          # Docker & deployment configs
+├── android/             # Android Capacitor app
+├── ios/                 # iOS Capacitor app
+├── deployment/          # Docker & deployment configs
+└── package.json         # Backend dependencies
 ```
 
-## Running Locally
+## Quick Start
 
-### Prerequisites
-- Node.js 18+
-- PostgreSQL database
-- MinIO or S3 storage (optional, for object storage)
-
-### Install Dependencies
+### From Backend Directory
 ```bash
+cd backend
 npm install
-```
-
-### Environment Variables
-Create a `.env` file in the backend directory:
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-NODE_ENV=development
-SESSION_SECRET=your-secret-key
-
-# Replit Auth (optional for local dev)
-ISSUER_URL=https://replit.com/...
-CLIENT_ID=...
-CLIENT_SECRET=...
-
-# Object Storage
-MINIO_ENDPOINT=...
-MINIO_ACCESS_KEY=...
-MINIO_SECRET_KEY=...
-
-# Twilio (SMS)
-TWILIO_ACCOUNT_SID=...
-TWILIO_AUTH_TOKEN=...
-TWILIO_PHONE_NUMBER=...
-
-# Email (Nodemailer)
-EMAIL_FROM=...
-SMTP_HOST=...
-SMTP_PORT=587
-SMTP_USER=...
-SMTP_PASS=...
-
-# Payments
-STRIPE_SECRET_KEY=...
-VITE_STRIPE_PUBLIC_KEY=...
-```
-
-### Run Development Server
-```bash
+cp .env.example .env  # Configure your environment
 npm run dev
 ```
 
-Server runs on `http://localhost:5000`
-
-### Database Management
+### From Root (via symlinks)
 ```bash
-# Push schema changes
-npm run db:push
+npm install
+npm run dev
+```
 
-# Generate migrations
-npm run db:generate
+Both approaches work because root has symlinks to backend directories.
 
-# Run migrations
-npm run db:migrate
+## Environment Variables
+See `.env.example` for required configuration.
+
+Key variables:
+- `DATABASE_URL` - PostgreSQL connection
+- `ALLOWED_ORIGINS` - Frontend CORS (comma-separated)
+- `SESSION_SECRET` - Session encryption key
+- `STRIPE_SECRET_KEY` - Payment processing
+- `TWILIO_ACCOUNT_SID` - SMS notifications
+- And more... (see .env.example)
+
+## Development
+
+### Running the Backend
+```bash
+npm run dev           # Start dev server (port 5000)
+```
+
+### Database Commands
+```bash
+npm run db:push       # Push schema changes
+npm run db:generate   # Generate migrations
+npm run db:migrate    # Run migrations
 ```
 
 ## API Endpoints
 
-### Public APIs (CORS-enabled for frontend)
-- `GET /api/branding` - Get company branding
-- `GET /api/vehicle-types` - Get all vehicle types
-- `GET /api/services` - Get all services
-- `POST /api/bookings` - Create a new booking
-- `POST /api/flight-search` - Search flights (AeroDataBox)
-- `POST /api/geocode` - Geocode address (TomTom)
+### Public (CORS-enabled for frontend)
+- `GET /api/branding` - Company branding
+- `GET /api/vehicle-types` - Vehicle list
+- `POST /api/bookings` - Create booking
+- `POST /api/flight-search` - Search flights
+- `POST /api/geocode` - Geocode address
 
-### Authenticated APIs
+### Authenticated
 - `POST /api/login` - User login
-- `POST /api/register` - User registration
-- `GET /api/user` - Get current user
-- `POST /api/logout` - User logout
-- `GET /api/bookings` - Get user bookings
-- `POST /api/bookings/:id/payment` - Process payment
+- `GET /api/user` - Current user
+- `GET /api/bookings` - User bookings
 
-### Admin APIs (require admin role)
-- `GET /api/admin/cms/*` - CMS management
-- `GET /api/admin/settings` - System settings
-- `POST /api/admin/vehicle-types` - Manage vehicle types
-- `GET /api/admin/users` - Manage users
-- `GET /api/admin/drivers` - Manage drivers
+### Admin Only
+- `GET /api/admin/*` - Admin endpoints
+
+## Tech Stack
+- Node.js 20 + Express.js
+- PostgreSQL + Drizzle ORM
+- Replit Auth (OpenID Connect)
+- MinIO/S3 Object Storage
+- Stripe/PayPal/Square Payments
+- Twilio SMS + Nodemailer Email
 
 ## Deployment
-
-### Docker Build
-```bash
-docker build -f deployment/Dockerfile -t usa-luxury-limo-backend .
-```
-
-### Coolify Deployment
-See `deployment/COOLIFY-DEPLOYMENT-GUIDE.md` for detailed instructions.
-
-### Environment Variables (Production)
-Set these in Coolify or your deployment platform:
-- `DATABASE_URL` - PostgreSQL connection string
-- `NODE_ENV=production`
-- `ALLOWED_ORIGINS` - Frontend domain (e.g., `https://www.best-chauffeurs.com`)
-- All other secrets (Stripe, Twilio, etc.)
-
-## CORS Configuration
-The backend allows requests from the frontend domain specified in `ALLOWED_ORIGINS` environment variable.
+See `deployment/COOLIFY-DEPLOYMENT-GUIDE.md`
 
 ## License
 Proprietary - USA Luxury Limo
