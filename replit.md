@@ -6,6 +6,55 @@ USA Luxury Limo is a full-stack Progressive Web Application (PWA) with native mo
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Project Structure (Monorepo)
+
+The project is organized as a monorepo with separate backend and frontend applications:
+
+```
+/
+├── backend/              (Backend + Admin/Driver/Dispatcher UIs)
+│   ├── server/           - Express API server
+│   ├── client/           - React admin/driver/dispatcher dashboards
+│   ├── database/         - Database configuration
+│   ├── migrations/       - Database migrations
+│   ├── scripts/          - Utility scripts
+│   ├── android/          - Android native app project
+│   ├── ios/              - iOS native app project
+│   ├── deployment/       - Docker deployment configs
+│   └── package.json      - Backend dependencies
+│
+├── frontend/             (Public Website - NEW)
+│   ├── src/
+│   │   ├── pages/        - Public pages (Home, About, Services, Fleet, Contact, etc.)
+│   │   ├── components/   - Reusable UI components
+│   │   └── lib/          - API client for backend communication
+│   ├── Dockerfile        - Frontend production deployment
+│   ├── nginx.conf        - Nginx configuration for serving frontend
+│   └── package.json      - Frontend dependencies
+│
+├── shared/               (Shared TypeScript Types)
+│   └── schema.ts         - Drizzle schema and types used by both projects
+│
+└── docker-compose.production.yml  - Orchestrates both services for deployment
+```
+
+### Development Workflow
+- **Backend Development**: `cd backend && npm run dev` - Runs Express API + admin UIs on port 5000
+- **Frontend Development**: `cd frontend && npm run dev` - Runs public website on port 3000
+- **Root Workflow**: `npm run dev` (delegates to backend for backward compatibility)
+
+### Deployment
+Both projects have independent Docker configurations:
+- **Backend**: `backend/deployment/Dockerfile.backend` - Multi-stage build with all features
+- **Frontend**: `frontend/Dockerfile` - Optimized Nginx-served static site
+- **Orchestration**: Root-level `docker-compose.production.yml` coordinates both services
+
+### API Communication
+The frontend communicates with the backend via:
+- **CORS**: Backend configured with `ALLOWED_ORIGINS` environment variable
+- **API Client**: Frontend uses `frontend/src/lib/api.ts` for type-safe backend requests
+- **Environment**: `VITE_API_BASE_URL` configures backend endpoint (default: `http://localhost:5000`)
+
 ## System Architecture
 
 ### UI/UX
@@ -31,7 +80,8 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing Shadcn/ui c
     - **Dynamic Branding System**: Comprehensive branding system accessible from Admin Settings with public API endpoint (`/api/branding`) providing company name, tagline, description, logo URL, favicon URL, and color palette with intelligent fallback defaults. Integrated across all web and mobile pages via the `useBranding` React hook (TanStack Query). Ensures consistent brand identity across website header/footer, mobile splash screen, and PWA assets without hardcoded values.
 
 ### System Design Choices
-The application is designed for flexible deployment across Replit, external Docker-based platforms (like Coolify), and native iOS/Android apps. It features a simplified Dockerfile, health check endpoints, and robust code splitting. Object storage and authentication are abstracted to allow switching between Replit-specific services and generic alternatives.
+The application is designed as a **monorepo** with separate backend and frontend projects, enabling flexible deployment across Replit, external Docker-based platforms (like Coolify), and native iOS/Android apps. It features independent Docker configurations, health check endpoints, and robust code splitting. Object storage and authentication are abstracted to allow switching between Replit-specific services and generic alternatives.
+- **Monorepo Architecture**: Backend contains all authentication, APIs, admin/driver/dispatcher portals, and mobile apps. Frontend is a standalone public website. Both share TypeScript types via `shared/schema.ts`. Development workflow uses symlinks at root for backward compatibility with existing Replit workflow while maintaining true separation in `backend/` and `frontend/` directories.
 - **Security & Configuration**: Sensitive settings are encrypted using AES-256-GCM. Admin dashboard and API endpoints are protected by subdomain-based access control, enforced both frontend and backend, configurable via `ADMIN_PANEL_HOSTS` environment variables.
 - **Database Persistence**: Employs external managed PostgreSQL (Neon) for data persistence across deployments. Follows best practices for data safety including external managed databases, separation of concerns, migration management with Drizzle, backup/recovery strategies, environment separation, and robust deployment workflows. Requires `NODE_ENV=production` for persistent session storage in production environments.
 
