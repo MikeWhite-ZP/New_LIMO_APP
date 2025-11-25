@@ -17,11 +17,12 @@ RUN npm ci
 
 # Copy source code
 COPY server ./server
-COPY shared ./shared
+COPY client ./client
 COPY database ./database
 COPY migrations ./migrations
 COPY tsconfig.json ./
 COPY drizzle.config.ts ./
+COPY vite.config.ts ./ 2>/dev/null || true
 
 # ================================================================
 # STAGE 2: PRODUCTION RUNTIME
@@ -39,11 +40,12 @@ RUN npm ci --only=production && \
 
 # Copy built application from builder
 COPY --from=builder /app/server ./server
-COPY --from=builder /app/shared ./shared
+COPY --from=builder /app/client ./client
 COPY --from=builder /app/database ./database
 COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/tsconfig.json ./
 COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/vite.config.ts ./ 2>/dev/null || true
 
 # Copy deployment scripts
 COPY deployment/entrypoint.sh ./
