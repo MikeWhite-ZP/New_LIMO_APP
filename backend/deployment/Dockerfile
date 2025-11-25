@@ -9,20 +9,30 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependency files
-COPY package*.json ./
+# Copy dependency files from backend folder
+COPY backend/package*.json ./
 
 # Install all dependencies (needed for building)
 RUN npm ci
 
-# Copy source code
-COPY server ./server
-COPY client ./client
-COPY database ./database
-COPY migrations ./migrations
-COPY tsconfig.json ./
-COPY drizzle.config.ts ./
-COPY vite.config.ts ./ 2>/dev/null || true
+# Copy source code from backend folder
+COPY backend/server ./server
+COPY backend/client ./client
+COPY backend/database ./database
+COPY backend/migrations ./migrations
+COPY backend/tsconfig.json ./
+COPY backend/drizzle.config.ts ./
+COPY backend/vite.config.ts ./
+COPY backend/tailwind.config.ts ./
+COPY backend/postcss.config.js ./
+COPY backend/components.json ./
+
+# Copy shared schemas from root (required for imports)
+COPY shared ./shared
+
+# Build application (Vite + esbuild)
+# This compiles TypeScript to JavaScript in dist/
+RUN npm run build
 
 # ================================================================
 # STAGE 2: PRODUCTION RUNTIME
@@ -31,25 +41,29 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files from backend
+COPY backend/package*.json ./
 
 # Install only production dependencies and clean cache
 RUN npm ci --only=production && \
     npm cache clean --force
 
-# Copy built application from builder
-COPY --from=builder /app/server ./server
-COPY --from=builder /app/client ./client
+# Copy compiled application from builder
+# Server bundle (esbuild output)
+COPY --from=builder /app/dist ./dist
+
+# Client assets (Vite output - admin/driver/dispatcher UIs)
+# Vite builds to dist/public/, which Express serves as static files
+
+# Database and shared code
 COPY --from=builder /app/database ./database
 COPY --from=builder /app/migrations ./migrations
-COPY --from=builder /app/tsconfig.json ./
+COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/drizzle.config.ts ./
-COPY --from=builder /app/vite.config.ts ./ 2>/dev/null || true
 
-# Copy deployment scripts
-COPY deployment/entrypoint.sh ./
-COPY deployment/healthcheck.sh ./
+# Copy deployment scripts from backend
+COPY backend/deployment/entrypoint.sh ./
+COPY backend/deployment/healthcheck.sh ./
 RUN chmod +x entrypoint.sh healthcheck.sh
 
 # Create non-root user for security
@@ -66,6 +80,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node healthcheck.sh
 
-# Start application
+# Start application (runs compiled JavaScript via entrypoint)
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["node", "--import", "tsx", "server/index.ts"]

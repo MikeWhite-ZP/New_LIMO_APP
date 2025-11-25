@@ -12,8 +12,10 @@ fi
 echo "📦 Environment: ${NODE_ENV:-development}"
 
 # Run database migrations
+# Note: drizzle-kit requires tsx to read TypeScript schema files
+# tsx is included in production dependencies for this purpose
 echo "🔄 Running database migrations..."
-npm run db:push || {
+NODE_OPTIONS='--import tsx' npx drizzle-kit push || {
   echo "⚠️  Migration failed, but continuing (may be expected in some cases)"
 }
 
@@ -23,6 +25,6 @@ echo "✅ Migrations complete"
 echo "🌱 Ensuring email templates are seeded..."
 # This is handled by server/index.ts on startup
 
-# Start application
-echo "🎯 Starting application..."
-exec "$@"
+# Start application (compiled production build)
+echo "🎯 Starting application from dist/index.js..."
+exec node dist/index.js

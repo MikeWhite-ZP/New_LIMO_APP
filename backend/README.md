@@ -46,7 +46,12 @@ Server runs on **http://localhost:5000**
 
 ### Docker Deployment (Production)
 
+**Important:** The Docker build requires access to the `shared/` folder at the repository root. The `docker-compose.yml` build context is set to `..` (parent directory) to include both `backend/` and `shared/`.
+
 ```bash
+# From the backend folder:
+cd backend
+
 # 1. Configure environment
 cp .env.example .env
 # Edit .env with production values
@@ -61,6 +66,15 @@ curl http://localhost:5000/health
 docker-compose logs -f
 ```
 
+**Build Process:**
+1. Multi-stage Docker build compiles TypeScript to JavaScript
+2. **Vite** builds React admin/driver/dispatcher UIs → `dist/public/`
+3. **esbuild** bundles Express server code → `dist/index.js`
+4. Both compiled outputs copied to production image
+5. Production runs `node dist/index.js` (serves static files from `dist/public/`)
+
+**Important:** Database migrations require TypeScript runtime in production because `drizzle.config.ts` references the TypeScript schema file (`shared/schema.ts`). Ensure `tsx` is in `dependencies` (not `devDependencies`) for production deployments. The entrypoint script uses `NODE_OPTIONS='--import tsx' npx drizzle-kit push` to handle this.
+
 ## 🏗️ Project Structure
 
 ```
@@ -73,7 +87,7 @@ backend/
 ├── database/            # Database configuration
 ├── migrations/          # Drizzle ORM migrations
 ├── deployment/          # Docker deployment files
-│   ├── Dockerfile       # Production image
+│   ├── Dockerfile       # Production image (multi-stage build)
 │   ├── entrypoint.sh    # Startup script with migrations
 │   ├── healthcheck.sh   # Health check endpoint
 │   └── .dockerignore    # Build optimization
@@ -81,7 +95,12 @@ backend/
 ├── .env.example         # Environment variable template
 ├── .dockerignore        # Docker build exclusions
 └── package.json         # Dependencies
+
+../shared/               # Shared TypeScript schemas (required)
+└── schema.ts            # Database schema definitions
 ```
+
+**Note:** Backend imports from `shared/schema.ts` at the repository root. The Docker build context includes this folder.
 
 ## 🔐 Environment Variables
 
