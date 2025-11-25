@@ -1,0 +1,62 @@
+# USA Luxury Limo - Backend Service
+# Standalone Docker Compose for Backend Only
+# Deploy this independently from frontend
+
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    
+    container_name: usa-limo-backend
+    restart: unless-stopped
+    
+    # Port mapping for local testing
+    # For Coolify: comment out and use Caddy labels
+    ports:
+      - "5000:5000"
+    
+    # Environment variables - load from .env file
+    env_file:
+      - .env
+    
+    # Alternative: Set directly or use Coolify UI
+    # environment:
+    #   - NODE_ENV=production
+    #   - DATABASE_URL=${DATABASE_URL}
+    #   - SESSION_SECRET=${SESSION_SECRET}
+    #   ... (see .env.example for full list)
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # === COOLIFY DEPLOYMENT ===
+    # Uncomment labels below for Coolify deployment
+    # Comment out the "ports" section when using Coolify
+    
+    # labels:
+    #   # Main API endpoint
+    #   - "caddy=https://api.${DOMAIN}"
+    #   - "caddy.encode=zstd gzip"
+    #   - "caddy.reverse_proxy={{upstreams 5000}}"
+    #   - "caddy.header=-Server"
+    #   - "caddy.header.X-Frame-Options=SAMEORIGIN"
+    #   - "caddy.header.X-Content-Type-Options=nosniff"
+    #   
+    #   # Admin panel subdomain
+    #   - "caddy_1=https://admin.${DOMAIN}"
+    #   - "caddy_1.encode=zstd gzip"
+    #   - "caddy_1.reverse_proxy={{upstreams 5000}}"
+    #   - "caddy_1.header=-Server"
+
+# Network configuration
+networks:
+  default:
+    name: usa-limo-backend-network
