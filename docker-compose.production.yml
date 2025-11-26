@@ -1,0 +1,166 @@
+# ==================================================================
+# USA LUXURY LIMO - PRODUCTION DEPLOYMENT
+# Coolify-Ready Docker Compose Configuration
+# ==================================================================
+# Complete monorepo deployment: Backend API + Frontend Website
+# Services:
+#   - backend: Express API + Admin Portals (internal port 5000)
+#   - frontend: React Public Website (internal port 80)
+#
+# Deployed via Coolify with automatic SSL/TLS via Caddy
+# ==================================================================
+
+version: "3.8"
+
+services:
+  # ================================================================
+  # BACKEND SERVICE - Express API + Admin/Driver/Dispatcher UIs
+  # ================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: deployment/Dockerfile
+    
+    container_name: usa-limo-backend
+    restart: unless-stopped
+    
+    # Environment variables - All configured in Coolify UI
+    environment:
+      # === APPLICATION ===
+      - NODE_ENV=production
+      - PORT=5000
+      
+      # === DATABASE (REQUIRED) ===
+      # PostgreSQL connection: postgresql://user:pass@host:5432/db
+      # URL-encode special chars: ? → %3F, @ → %40, # → %23
+      - DATABASE_URL=${DATABASE_URL}
+      
+      # === SECURITY (REQUIRED) ===
+      # 32+ character random string
+      - SESSION_SECRET=${SESSION_SECRET}
+      # Exactly 32 characters
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      
+      # === DOMAINS & CORS (REQUIRED) ===
+      - DOMAIN=${DOMAIN}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ADMIN_PANEL_HOSTS=${ADMIN_PANEL_HOSTS}
+      - BASE_URL=${BASE_URL}
+      - API_BASE_URL=${API_BASE_URL}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      
+      # === OBJECT STORAGE (REQUIRED) ===
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_PORT=${MINIO_PORT:-9000}
+      - MINIO_USE_SSL=${MINIO_USE_SSL:-true}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET:-luxury-limo}
+      
+      # === PAYMENT PROCESSING (REQUIRED) ===
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - VITE_STRIPE_PUBLIC_KEY=${VITE_STRIPE_PUBLIC_KEY}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+      - PAYPAL_MODE=${PAYPAL_MODE:-live}
+      - SQUARE_ACCESS_TOKEN=${SQUARE_ACCESS_TOKEN}
+      - SQUARE_LOCATION_ID=${SQUARE_LOCATION_ID}
+      - SQUARE_ENVIRONMENT=${SQUARE_ENVIRONMENT:-production}
+      
+      # === SMS NOTIFICATIONS (REQUIRED) ===
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      
+      # === EMAIL NOTIFICATIONS (REQUIRED) ===
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      
+      # === APIs (REQUIRED) ===
+      - TOMTOM_API_KEY=${TOMTOM_API_KEY}
+      - AERODATABOX_API_KEY=${AERODATABOX_API_KEY}
+      
+      # === AUTHENTICATION (Optional - Replit only) ===
+      - ISSUER_URL=${ISSUER_URL}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - REPLIT_DOMAINS=${REPLIT_DOMAINS}
+    
+    # Health check - verifies API is responding
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # === COOLIFY CADDY LABELS ===
+    # Automatic SSL certificate + routing configuration
+    labels:
+      # Backend API endpoint (api.domain.com)
+      - "caddy=https://api.${DOMAIN}"
+      - "caddy.encode=zstd gzip"
+      - "caddy.reverse_proxy={{upstreams 5000}}"
+      - "caddy.header=-Server"
+      - "caddy.header.X-Frame-Options=SAMEORIGIN"
+      - "caddy.header.X-Content-Type-Options=nosniff"
+      
+      # Admin panel subdomain (admin.domain.com)
+      - "caddy_1=https://admin.${DOMAIN}"
+      - "caddy_1.encode=zstd gzip"
+      - "caddy_1.reverse_proxy={{upstreams 5000}}"
+      - "caddy_1.header=-Server"
+
+  # ================================================================
+  # FRONTEND SERVICE - React Public Website with Nginx
+  # ================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Build argument for API endpoint
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    
+    container_name: usa-limo-frontend
+    restart: unless-stopped
+    
+    # Health check - verifies website is responding
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    
+    # === COOLIFY CADDY LABELS ===
+    # Automatic SSL certificate + routing configuration
+    labels:
+      # Main website domain (domain.com)
+      - "caddy=https://${DOMAIN}"
+      - "caddy.encode=zstd gzip"
+      - "caddy.reverse_proxy={{upstreams 80}}"
+      - "caddy.header=-Server"
+      - "caddy.header.X-Frame-Options=SAMEORIGIN"
+      - "caddy.header.X-Content-Type-Options=nosniff"
+      
+      # WWW redirect (www.domain.com → domain.com)
+      - "caddy_1=https://www.${DOMAIN}"
+      - "caddy_1.redir=https://${DOMAIN}{uri}"
+    
+    # Frontend waits for backend to be healthy
+    depends_on:
+      backend:
+        condition: service_healthy
+
+# ================================================================
+# SHARED DOCKER NETWORK
+# ================================================================
+# Services communicate internally via Docker network
+networks:
+  default:
+    name: usa-limo-network
