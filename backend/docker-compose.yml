@@ -5,10 +5,9 @@ version: "3.8"
 services:
   backend:
     build:
-      # Build context is current directory (backend/)
-      # Dockerfile path is relative to context
+      # When compose runs from repo root, this points to repo root
       context: .
-      dockerfile: deployment/Dockerfile
+      dockerfile: backend/deployment/Dockerfile
     
     container_name: usa-limo-backend
     restart: unless-stopped
