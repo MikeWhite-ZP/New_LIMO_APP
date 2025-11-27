@@ -32,7 +32,7 @@ services:
     
     # Health check
     healthcheck:
-      test: ["CMD", "node", "healthcheck.sh"]
+      test: ["CMD-SHELL", "node healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
