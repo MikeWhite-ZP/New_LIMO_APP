@@ -1,15 +1,14 @@
 # USA Luxury Limo - Backend Service
 # Standalone Docker Compose for Backend Only
 # Deploy this independently from frontend
-
 version: "3.8"
-
 services:
   backend:
     build:
-      # Build context is parent directory to access both backend/ and shared/
-      context: ..
-      dockerfile: backend/deployment/Dockerfile
+      # Build context is current directory (backend/)
+      # Dockerfile path is relative to context
+      context: .
+      dockerfile: deployment/Dockerfile
     
     container_name: usa-limo-backend
     restart: unless-stopped
