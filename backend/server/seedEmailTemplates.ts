@@ -1,5 +1,5 @@
 import { db } from './db';
-import { emailTemplates } from '../../shared/schema.js';
+import { emailTemplates } from '../../shared/schema';
 import { getAllDefaultEmailTemplates } from './emailTemplateDefaults';
 
 /**

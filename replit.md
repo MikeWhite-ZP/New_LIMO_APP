@@ -101,22 +101,30 @@ The application is designed as a **monorepo** with separate backend and frontend
 - **AWS SDK**: For S3-compatible storage.
 - **Ionic Capacitor**: Native app framework (removed from deployment - web only).
 
+## Recent Changes (November 27, 2025)
+
+### Multi-Tenancy Implementation ✨
+- ✅ Implemented dynamic database connections per company
+- ✅ Created company context middleware (`backend/server/companyContext.ts`)
+- ✅ Automatic company detection from request domain
+- ✅ Connection pooling and caching for performance
+- ✅ Pre-configured for best-chauffeurs and hopelimo domains
+- ✅ Comprehensive multi-tenancy guides created:
+  - `backend/MULTI_TENANCY_GUIDE.md` - Full documentation
+  - `backend/MULTI_TENANCY_SETUP.md` - Quick setup instructions
+- ✅ Fixed import paths for both dev (tsx) and production (esbuild) builds
+- ✅ Server running successfully with multi-tenancy active
+
+### Build Process Fixed
+- ✅ Resolved esbuild module resolution issues
+- ✅ Import paths now work for both tsx (dev) and esbuild (prod): `../../shared/schema`
+- ✅ Application builds successfully: `dist/index.js (547.3kb)`
+- ✅ Email templates auto-seed on startup
+
 ## Recent Changes (November 24, 2025)
 
 ### Backend Deployment Cleanup
 - ✅ Removed unnecessary folders: `android/`, `ios/`, `docs/`
-- ✅ Cleaned `backend/deployment/` - only essential files remain:
-  - `Dockerfile` - Production-optimized multi-stage build
-  - `entrypoint.sh` - Startup initialization with DB migrations
-  - `healthcheck.sh` - Service health check
-  - `.dockerignore` - Build optimization
-- ✅ Removed redundant documentation files from deployment folder
+- ✅ Cleaned `backend/deployment/` - only essential files remain
 - ✅ Created comprehensive `.env.example` with all required variables
 - ✅ Updated `docker-compose.production.yml` for clean monorepo structure
-- ✅ Created Coolify-focused `DEPLOYMENT.md`
-
-### Backend Structure Optimization
-- Minimal deployment folder - only 4 files needed for production
-- No unnecessary scripts or documentation in deployment folder
-- Clear separation: backend logic vs deployment config
-- Environment variables centralized in `.env.example`
