@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { startScheduledJobs } from "./scheduledJobs";
+import { companyContextMiddleware } from "./companyContext";
 
 const log = console.log;
 const app = express();
@@ -32,6 +33,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Attach company context to each request (multi-tenancy support)
+app.use(companyContextMiddleware);
 
 // Health check endpoint (add this BEFORE other middleware)
 app.get("/health", (_req, res) => {
