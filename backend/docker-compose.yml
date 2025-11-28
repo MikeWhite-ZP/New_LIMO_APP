@@ -24,18 +24,13 @@ services:
       - coolify.managed=true
       - coolify.applicationId=8
       - coolify.type=application
-      # Caddy Docker Proxy labels
+      # Caddy Docker Proxy - adminaccess domain
       - caddy=adminaccess.best-chauffeurs.com
       - caddy.reverse_proxy={{upstreams 5000}}
-      - caddy.reverse_proxy.header_up=X-Real-IP {http.request.remote}
-      - caddy.reverse_proxy.header_up=X-Forwarded-For {http.request.remote}
-      - caddy.reverse_proxy.header_up=X-Forwarded-Proto {http.request.scheme}
-      # API domain
-      - caddy.1=api.best-chauffeurs.com
-      - caddy.1.reverse_proxy={{upstreams 5000}}
-      - caddy.1.reverse_proxy.header_up=X-Real-IP {http.request.remote}
-      - caddy.1.reverse_proxy.header_up=X-Forwarded-For {http.request.remote}
-      - caddy.1.reverse_proxy.header_up=X-Forwarded-Proto {http.request.scheme}
+      # Caddy Docker Proxy - api domain
+      - caddy.api=api.best-chauffeurs.com
+      - caddy.api.reverse_proxy={{upstreams 5000}}
+
   db:
     image: 'postgres:15-alpine'
     container_name: best-chauffeurs-db
@@ -61,8 +56,10 @@ services:
       - coolify.managed=true
       - coolify.applicationId=8
       - coolify.type=application
+
 networks:
   coolify:
     external: true
+
 volumes:
   db_data: null
