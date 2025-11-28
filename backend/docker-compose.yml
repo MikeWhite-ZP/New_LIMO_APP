@@ -24,12 +24,8 @@ services:
       - coolify.managed=true
       - coolify.applicationId=8
       - coolify.type=application
-      # Caddy Docker Proxy - adminaccess domain
       - caddy=adminaccess.best-chauffeurs.com
       - caddy.reverse_proxy={{upstreams 5000}}
-      # Caddy Docker Proxy - api domain
-      - caddy.api=api.best-chauffeurs.com
-      - caddy.api.reverse_proxy={{upstreams 5000}}
 
   db:
     image: 'postgres:15-alpine'
