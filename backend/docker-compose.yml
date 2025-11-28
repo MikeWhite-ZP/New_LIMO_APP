@@ -29,32 +29,6 @@ services:
       - coolify.type=application
       - coolify.serviceName=backend
       - coolify.serviceType=application
-      - traefik.enable=true
-      - traefik.http.routers.best-chauffeurs-backend-http.rule=Host(`adminaccess.best-chauffeurs.com`,`api.best-chauffeurs.com`)
-      - traefik.http.routers.best-chauffeurs-backend-http.entrypoints=web
-      - traefik.http.routers.best-chauffeurs-backend-https.rule=Host(`adminaccess.best-chauffeurs.com`,`api.best-chauffeurs.com`)
-      - traefik.http.routers.best-chauffeurs-backend-https.entrypoints=websecure
-      - traefik.http.routers.best-chauffeurs-backend-https.tls=true
-      - traefik.http.services.best-chauffeurs-backend.loadbalancer.server.port=5000
-
-  # Nginx Reverse Proxy for SSL and domains
-  reverse-proxy:
-    image: nginx:latest
-    container_name: best-chauffeurs-reverse-proxy
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-    networks:
-      - coolify
-    depends_on:
-      - backend
-    labels:
-      - coolify.managed=true
-      - coolify.type=service
 
 networks:
   coolify:
