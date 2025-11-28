@@ -1,61 +1,62 @@
-# USA Luxury Limo - Backend Service
-# Standalone Docker Compose for Backend Only
-# Deploy this independently from frontend
-version: "3.8"
+version: '3.8'
+
 services:
   backend:
     build:
-      # When compose runs from repo root, this points to repo root
       context: .
       dockerfile: backend/deployment/Dockerfile
-    
-    container_name: usa-limo-backend
+    container_name: best-chauffeurs-backend
     restart: unless-stopped
-    
-    # Port mapping for local testing
-    # For Coolify: comment out and use Caddy labels
+    expose:
+      - '5000'
     ports:
-      - "5000:5000"
-    
-    # Environment variables - load from .env file
+      - '5000:5000'
     env_file:
       - .env
-    
-    # Alternative: Set directly or use Coolify UI
-    # environment:
-    #   - NODE_ENV=production
-    #   - DATABASE_URL=${DATABASE_URL}
-    #   - SESSION_SECRET=${SESSION_SECRET}
-    #   ... (see .env.example for full list)
-    
-    # Health check
     healthcheck:
-      test: ["CMD-SHELL", "node healthcheck.sh"]
+      test:
+        - CMD-SHELL
+        - 'node healthcheck.sh'
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    
-    # === COOLIFY DEPLOYMENT ===
-    # Uncomment labels below for Coolify deployment
-    # Comment out the "ports" section when using Coolify
-    
-    # labels:
-    #   # Main API endpoint
-    #   - "caddy=https://api.${DOMAIN}"
-    #   - "caddy.encode=zstd gzip"
-    #   - "caddy.reverse_proxy={{upstreams 5000}}"
-    #   - "caddy.header=-Server"
-    #   - "caddy.header.X-Frame-Options=SAMEORIGIN"
-    #   - "caddy.header.X-Content-Type-Options=nosniff"
-    #   
-    #   # Admin panel subdomain
-    #   - "caddy_1=https://admin.${DOMAIN}"
-    #   - "caddy_1.encode=zstd gzip"
-    #   - "caddy_1.reverse_proxy={{upstreams 5000}}"
-    #   - "caddy_1.header=-Server"
+    networks:
+      - coolify
+    labels:
+      - coolify.managed=true
+      - coolify.applicationId=8
+      - coolify.type=application
+      - coolify.serviceName=backend
+      - coolify.serviceType=application
+      - traefik.enable=true
+      - traefik.http.routers.best-chauffeurs-backend-http.rule=Host(`adminaccess.best-chauffeurs.com`,`api.best-chauffeurs.com`)
+      - traefik.http.routers.best-chauffeurs-backend-http.entrypoints=web
+      - traefik.http.routers.best-chauffeurs-backend-https.rule=Host(`adminaccess.best-chauffeurs.com`,`api.best-chauffeurs.com`)
+      - traefik.http.routers.best-chauffeurs-backend-https.entrypoints=websecure
+      - traefik.http.routers.best-chauffeurs-backend-https.tls=true
+      - traefik.http.services.best-chauffeurs-backend.loadbalancer.server.port=5000
 
-# Network configuration
+  # Nginx Reverse Proxy for SSL and domains
+  reverse-proxy:
+    image: nginx:latest
+    container_name: best-chauffeurs-reverse-proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    networks:
+      - coolify
+    depends_on:
+      - backend
+    labels:
+      - coolify.managed=true
+      - coolify.type=service
+
 networks:
-  default:
-    name: usa-limo-backend-network
+  coolify:
+    name: coolify
+    external: true
