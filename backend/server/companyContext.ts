@@ -41,7 +41,25 @@ const DOMAIN_TO_COMPANY_MAP: Record<string, string> = {
   // Fallback for localhost/testing
   'localhost': 'best_chauffeurs',
   'api.localhost': 'best_chauffeurs',
+  '127.0.0.1': 'best_chauffeurs',
+  '0.0.0.0': 'best_chauffeurs',
 };
+
+/**
+ * Check if domain is a known development domain pattern
+ */
+function isDevelopmentDomain(hostname: string): boolean {
+  const devPatterns = [
+    '.replit.dev',
+    '.replit.app',
+    '.repl.co',
+    '.picard.replit.dev',
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+  ];
+  return devPatterns.some(pattern => hostname.includes(pattern) || hostname === pattern);
+}
 
 /**
  * Extract company ID from request (hostname/domain)
@@ -69,7 +87,10 @@ export function extractCompanyFromRequest(req: Request): CompanyContext {
   const companyId = DOMAIN_TO_COMPANY_MAP[hostname];
 
   if (!companyId) {
-    console.warn(`Unknown domain: ${hostname}, defaulting to best_chauffeurs`);
+    // Only log warning for unknown production domains, not development domains
+    if (!isDevelopmentDomain(hostname)) {
+      console.warn(`Unknown domain: ${hostname}, defaulting to best_chauffeurs`);
+    }
     return {
       companyId: 'best_chauffeurs',
       domain: hostname,
