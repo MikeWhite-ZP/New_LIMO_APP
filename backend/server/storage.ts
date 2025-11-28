@@ -68,7 +68,7 @@ import {
   emailTemplates,
   type EmailTemplate,
   type InsertEmailTemplate,
-} from "../../shared/schema";
+} from from "../../../shared/schema";
 import { db } from "./db";
 import { eq, and, desc, like, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
