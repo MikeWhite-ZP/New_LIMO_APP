@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, hashPassword, comparePasswords, generateResetToken, hashToken, isTokenExpired, PASSWORD_RESET_EXPIRY_MS } from "./auth";
-import { insertBookingSchema, insertContactSchema, insertSavedAddressSchema, insertPricingRuleSchema, insertVehicleTypeSchema, insertDriverDocumentSchema, insertCmsSettingSchema, insertCmsContentSchema, insertCmsMediaSchema, insertServiceSchema, type User, type Booking, vehicles } from "../../shared/schema";
+import { insertBookingSchema, insertContactSchema, insertSavedAddressSchema, insertPricingRuleSchema, insertVehicleTypeSchema, insertDriverDocumentSchema, insertCmsSettingSchema, insertCmsContentSchema, insertCmsMediaSchema, insertServiceSchema, type User, type Booking, vehicles } from "../../../shared/schema";
 import { z } from "zod";
 import Stripe from "stripe";
 import multer from "multer";
