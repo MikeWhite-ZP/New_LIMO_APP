@@ -47,8 +47,7 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Install only production dependencies and clean cache
-RUN npm ci --only=production && \
-    npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copy compiled application from builder
 # Server bundle (esbuild output)
