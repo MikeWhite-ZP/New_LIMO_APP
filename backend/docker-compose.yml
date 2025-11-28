@@ -21,7 +21,6 @@ services:
       start_period: 40s
     networks:
       - coolify
-      - best-chauffeurs-db_default  # Database network
     labels:
       # Coolify Management
       - coolify.managed=true
@@ -40,6 +39,4 @@ services:
 networks:
   coolify:
     name: coolify
-    external: true
-  best-chauffeurs-db_default:
     external: true
