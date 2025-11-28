@@ -19,7 +19,9 @@ RUN npm ci
 COPY backend/server ./server
 COPY backend/client ./client
 COPY backend/database ./database
+COPY backend/deployment ./deployment
 COPY backend/migrations ./migrations
+COPY backend/scripts ./scripts
 COPY backend/tsconfig.json ./
 COPY backend/drizzle.config.ts ./
 COPY backend/vite.config.ts ./
