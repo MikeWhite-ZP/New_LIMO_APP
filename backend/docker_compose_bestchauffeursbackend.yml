@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: backend/deployment/Dockerfile
     
-    container_name: usa-limo-backend
+    container_name: best-chauffeurs-backend
     restart: unless-stopped
     
     environment:
