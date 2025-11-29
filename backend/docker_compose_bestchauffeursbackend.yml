@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/deployment/Dockerfile
+    
+    container_name: usa-limo-backend
+    restart: unless-stopped
+    
+    environment:
+      # Node environment
+      NODE_ENV: production
+      PORT: 5000
+      
+      # Database (REQUIRED - use your DATABASE_URL)
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Security
+      SESSION_SECRET: ${SESSION_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      
+      # Domain configuration
+      DOMAIN: best-chauffeurs.com
+      ALLOWED_ORIGINS: https://best-chauffeurs.com,https://www.best-chauffeurs.com
+      ADMIN_PANEL_HOSTS: adminaccess.best-chauffeurs.com
+      BASE_URL: https://best-chauffeurs.com
+      API_BASE_URL: https://api.best-chauffeurs.com
+      
+      # Payment (Stripe)
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      VITE_STRIPE_PUBLIC_KEY: ${VITE_STRIPE_PUBLIC_KEY}
+      
+      # SMS (Twilio)
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
+      
+      # Email (SMTP)
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+      
+      # Location services
+      TOMTOM_API_KEY: ${TOMTOM_API_KEY}
+      
+      # Object storage (MinIO)
+      MINIO_ENDPOINT: minio.best-chauffeurs.com
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: true
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: luxury-limo
+    
+    healthcheck:
+      test: ["CMD-SHELL", "node healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    labels:
+      # API Endpoint
+      - "caddy=https://api.best-chauffeurs.com"
+      - "caddy.encode=zstd gzip"
+      - "caddy.reverse_proxy={{upstreams 5000}}"
+      - "caddy.header=-Server"
+      - "caddy.header.X-Frame-Options=SAMEORIGIN"
+      - "caddy.header.X-Content-Type-Options=nosniff"
+      - "caddy.header.X-XSS-Protection=1; mode=block"
+      - "caddy.header.Referrer-Policy=strict-origin-when-cross-origin"
+      
+      # Admin Panel
+      - "caddy_admin=https://adminaccess.best-chauffeurs.com"
+      - "caddy_admin.reverse_proxy={{upstreams 5000}}"
+
+networks:
+  default:
+    name: usa-limo-network
